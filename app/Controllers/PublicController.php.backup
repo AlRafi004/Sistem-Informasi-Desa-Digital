@@ -1,0 +1,876 @@
+<?php
+
+namespace App\Controllers;
+
+class PublicController
+{
+    public function index()
+    {
+        $profil = $this->getProfilDesa();
+        $this->view('public/index', ['profil' => $profil]);
+    }
+    
+    public function layanan()
+    {
+        $this->viewLayanan();
+    }
+    
+    public function profil()
+    {
+        $profil = $this->getProfilDesa();
+        $this->viewProfil($profil);
+    }
+    
+    public function tracking($tracking_number)
+    {
+        $this->viewTracking($tracking_number);
+    }
+    
+    private function getProfilDesa()
+    {
+        // Return default data if database connection fails
+        return [
+            'nama_desa' => 'Desa Tumbang Jutuh',
+            'kecamatan' => 'Katingan Hulu',
+            'kabupaten' => 'Kabupaten Katingan',
+            'jumlah_penduduk' => 2450,
+            'jumlah_kk' => 650,
+            'luas_wilayah' => 125.50
+        ];
+    }
+    
+    private function getDatabase()
+    {
+        try {
+            $host = $_ENV['DB_HOST'] ?? 'localhost';
+            $dbname = $_ENV['DB_DATABASE'] ?? 'desa_digital';
+            $username = $_ENV['DB_USERNAME'] ?? 'root';
+            $password = $_ENV['DB_PASSWORD'] ?? '';
+            
+            $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
+            return new \PDO($dsn, $username, $password, [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC
+            ]);
+        } catch (\PDOException $e) {
+            return null;
+        }
+    }
+    
+    private function view($template, $data = [])
+    {
+        extract($data);
+        
+        // Simple homepage
+        echo $this->getSimpleHomepage($data);
+    }
+    
+    private function getSimpleHomepage($data = [])
+    {
+        $profil = $data['profil'] ?? null;
+        
+        $html = "<!DOCTYPE html>
+<html lang='id'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Sistem Informasi Desa Digital</title>
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'>
+    <style>
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class='navbar navbar-expand-lg navbar-light bg-white shadow-sm'>
+        <div class='container'>
+            <a class='navbar-brand fw-bold' href='/'>
+                <i class='fas fa-home me-2 text-primary'></i>Desa Digital
+            </a>
+            <div class='navbar-nav ms-auto'>
+                <a class='nav-link' href='/'>Beranda</a>
+                <a class='nav-link' href='/profil'>Profil Desa</a>
+                <a class='nav-link' href='/layanan'>Layanan</a>
+                <a class='nav-link' href='/login'>Login Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class='hero-section text-white py-5'>
+        <div class='container'>
+            <div class='row align-items-center'>
+                <div class='col-lg-8'>
+                    <h1 class='display-4 fw-bold mb-3'>Selamat Datang di Portal Desa Digital</h1>
+                    <p class='lead mb-4'>
+                        Sistem Informasi Desa Digital Kabupaten Katingan - 
+                        Memudahkan pelayanan administrasi dan informasi desa dalam satu platform.
+                    </p>
+                    <div class='d-flex gap-3'>
+                        <a href='/layanan' class='btn btn-light btn-lg'>
+                            <i class='fas fa-file-alt me-2'></i>Ajukan Surat
+                        </a>
+                        <a href='/profil' class='btn btn-outline-light btn-lg'>
+                            <i class='fas fa-info-circle me-2'></i>Profil Desa
+                        </a>
+                    </div>
+                </div>
+                <div class='col-lg-4 text-center'>
+                    <i class='fas fa-home fa-10x opacity-75'></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class='container py-5'>
+        <div class='row'>
+            <div class='col-12 text-center mb-5'>
+                <h2 class='fw-bold'>Layanan Unggulan</h2>
+                <p class='text-muted'>Berbagai layanan digital untuk memudahkan warga desa</p>
+            </div>
+        </div>
+        
+        <div class='row g-4'>
+            <div class='col-lg-4 col-md-6'>
+                <div class='card h-100 shadow-sm'>
+                    <div class='card-body text-center p-4'>
+                        <div class='text-primary mb-3'>
+                            <i class='fas fa-file-alt fa-3x'></i>
+                        </div>
+                        <h5 class='card-title'>Pengajuan Surat Online</h5>
+                        <p class='card-text text-muted'>
+                            Ajukan berbagai jenis surat keterangan secara online tanpa perlu datang ke kantor desa.
+                        </p>
+                        <a href='/layanan' class='btn btn-primary'>Mulai Pengajuan</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class='col-lg-4 col-md-6'>
+                <div class='card h-100 shadow-sm'>
+                    <div class='card-body text-center p-4'>
+                        <div class='text-success mb-3'>
+                            <i class='fas fa-search fa-3x'></i>
+                        </div>
+                        <h5 class='card-title'>Tracking Status</h5>
+                        <p class='card-text text-muted'>
+                            Pantau status pengajuan surat Anda secara real-time dengan nomor pengajuan.
+                        </p>
+                        <button class='btn btn-success' onclick='trackStatus()'>Cek Status</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class='col-lg-4 col-md-6'>
+                <div class='card h-100 shadow-sm'>
+                    <div class='card-body text-center p-4'>
+                        <div class='text-info mb-3'>
+                            <i class='fas fa-map-marker-alt fa-3x'></i>
+                        </div>
+                        <h5 class='card-title'>Profil Desa</h5>
+                        <p class='card-text text-muted'>
+                            Informasi lengkap tentang profil desa, demografi, dan potensi yang dimiliki.
+                        </p>
+                        <a href='/profil' class='btn btn-info'>Lihat Profil</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>";
+
+        if ($profil) {
+            $formatted_penduduk = number_format($profil['jumlah_penduduk'] ?? 0);
+            $formatted_kk = number_format($profil['jumlah_kk'] ?? 0);
+            $formatted_luas = number_format($profil['luas_wilayah'] ?? 0, 2) . ' km²';
+            
+            $html .= "
+    <!-- Statistics Section -->
+    <div class='bg-light py-5'>
+        <div class='container'>
+            <div class='row text-center'>
+                <div class='col-12 mb-4'>
+                    <h3 class='fw-bold'>" . htmlspecialchars($profil['nama_desa']) . "</h3>
+                    <p class='text-muted'>" . htmlspecialchars($profil['kecamatan'] . ', ' . $profil['kabupaten']) . "</p>
+                </div>
+            </div>
+            
+            <div class='row g-4'>
+                <div class='col-lg-3 col-md-6 text-center'>
+                    <div class='display-4 fw-bold text-primary'>$formatted_penduduk</div>
+                    <div class='text-muted'>Total Penduduk</div>
+                </div>
+                <div class='col-lg-3 col-md-6 text-center'>
+                    <div class='display-4 fw-bold text-success'>$formatted_kk</div>
+                    <div class='text-muted'>Kepala Keluarga</div>
+                </div>
+                <div class='col-lg-3 col-md-6 text-center'>
+                    <div class='display-4 fw-bold text-info'>$formatted_luas</div>
+                    <div class='text-muted'>Luas Wilayah</div>
+                </div>
+                <div class='col-lg-3 col-md-6 text-center'>
+                    <div class='display-4 fw-bold text-warning'>24/7</div>
+                    <div class='text-muted'>Layanan Online</div>
+                </div>
+            </div>
+        </div>
+    </div>";
+        }
+        
+        $html .= "
+    <!-- Footer -->
+    <footer class='bg-dark text-white py-4 mt-5'>
+        <div class='container text-center'>
+            <p>&copy; 2024 Sistem Informasi Desa Digital - Kabupaten Katingan</p>
+            <p class='text-muted'>
+                <i class='fas fa-phone me-2'></i>+62 XXX-XXXX-XXXX | 
+                <i class='fas fa-envelope me-2'></i>info@desadigital.com
+            </p>
+        </div>
+    </footer>
+
+    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script>
+    <script>
+        function trackStatus() {
+            const nomor = prompt('Masukkan nomor pengajuan Anda:');
+            if (nomor) {
+                window.location.href = '/tracking/' + nomor;
+            }
+        }
+    </script>
+</body>
+</html>";
+        
+        return $html;
+    }
+</body>
+</html>";
+    }
+    
+    private function viewLayanan()
+    {
+        echo "<!DOCTYPE html>
+<html lang='id'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Layanan Publik - Sistem Informasi Desa Digital</title>
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'>
+</head>
+<body>
+    <nav class='navbar navbar-expand-lg navbar-dark bg-primary'>
+        <div class='container'>
+            <a class='navbar-brand' href='/'>
+                <i class='fas fa-village me-2'></i>Desa Digital
+            </a>
+            <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNav'>
+                <span class='navbar-toggler-icon'></span>
+            </button>
+            <div class='collapse navbar-collapse' id='navbarNav'>
+                <ul class='navbar-nav ms-auto'>
+                    <li class='nav-item'><a class='nav-link' href='/'>Beranda</a></li>
+                    <li class='nav-item'><a class='nav-link active' href='/layanan'>Layanan</a></li>
+                    <li class='nav-item'><a class='nav-link' href='/profil'>Profil Desa</a></li>
+                    <li class='nav-item'><a class='nav-link' href='/login'>Login Admin</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class='container my-5'>
+        <h1 class='text-center mb-5'>Layanan Publik Desa</h1>
+        
+        <div class='row'>
+            <div class='col-md-6 mb-4'>
+                <div class='card h-100 shadow'>
+                    <div class='card-header bg-success text-white'>
+                        <h5 class='mb-0'><i class='fas fa-file-alt me-2'></i>Surat Keterangan Domisili</h5>
+                    </div>
+                    <div class='card-body'>
+                        <p>Pengajuan surat keterangan domisili untuk berbagai keperluan administratif.</p>
+                        <p><strong>Syarat:</strong></p>
+                        <ul>
+                            <li>Fotocopy KTP</li>
+                            <li>Fotocopy KK</li>
+                            <li>Surat pengantar RT/RW</li>
+                        </ul>
+                        <p><strong>Waktu Proses:</strong> 1-2 hari kerja</p>
+                    </div>
+                    <div class='card-footer'>
+                        <button class='btn btn-success' onclick='ajukanSurat(\"domisili\")'>Ajukan Sekarang</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class='col-md-6 mb-4'>
+                <div class='card h-100 shadow'>
+                    <div class='card-header bg-info text-white'>
+                        <h5 class='mb-0'><i class='fas fa-store me-2'></i>Surat Izin Usaha</h5>
+                    </div>
+                    <div class='card-body'>
+                        <p>Pengajuan surat izin usaha untuk kegiatan ekonomi di wilayah desa.</p>
+                        <p><strong>Syarat:</strong></p>
+                        <ul>
+                            <li>Fotocopy KTP</li>
+                            <li>Fotocopy KK</li>
+                            <li>Proposal usaha</li>
+                        </ul>
+                        <p><strong>Waktu Proses:</strong> 3-5 hari kerja</p>
+                    </div>
+                    <div class='card-footer'>
+                        <button class='btn btn-info' onclick='ajukanSurat(\"usaha\")'>Ajukan Sekarang</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class='col-md-6 mb-4'>
+                <div class='card h-100 shadow'>
+                    <div class='card-header bg-warning text-dark'>
+                        <h5 class='mb-0'><i class='fas fa-certificate me-2'></i>Surat Keterangan Umum</h5>
+                    </div>
+                    <div class='card-body'>
+                        <p>Pengajuan surat keterangan untuk berbagai keperluan umum.</p>
+                        <p><strong>Syarat:</strong></p>
+                        <ul>
+                            <li>Fotocopy KTP</li>
+                            <li>Fotocopy KK</li>
+                            <li>Surat permohonan</li>
+                        </ul>
+                        <p><strong>Waktu Proses:</strong> 1-3 hari kerja</p>
+                    </div>
+                    <div class='card-footer'>
+                        <button class='btn btn-warning' onclick='ajukanSurat(\"keterangan\")'>Ajukan Sekarang</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class='col-md-6 mb-4'>
+                <div class='card h-100 shadow'>
+                    <div class='card-header bg-danger text-white'>
+                        <h5 class='mb-0'><i class='fas fa-shield-alt me-2'></i>Surat Pengantar SKCK</h5>
+                    </div>
+                    <div class='card-body'>
+                        <p>Pengajuan surat pengantar untuk pembuatan SKCK di kepolisian.</p>
+                        <p><strong>Syarat:</strong></p>
+                        <ul>
+                            <li>Fotocopy KTP</li>
+                            <li>Fotocopy KK</li>
+                            <li>Pas foto 4x6</li>
+                        </ul>
+                        <p><strong>Waktu Proses:</strong> 1 hari kerja</p>
+                    </div>
+                    <div class='card-footer'>
+                        <button class='btn btn-danger' onclick='ajukanSurat(\"skck\")'>Ajukan Sekarang</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class='row mt-5'>
+            <div class='col-md-8 mx-auto'>
+                <div class='card bg-light'>
+                    <div class='card-body text-center'>
+                        <h5><i class='fas fa-search me-2'></i>Lacak Status Pengajuan</h5>
+                        <p class='text-muted'>Masukkan nomor pengajuan untuk melacak status surat Anda</p>
+                        <button class='btn btn-primary' onclick='trackStatus()'>Lacak Status</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class='bg-dark text-white py-4 mt-5'>
+        <div class='container text-center'>
+            <p>&copy; 2024 Sistem Informasi Desa Digital - Kabupaten Katingan</p>
+        </div>
+    </footer>
+
+    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script>
+    <script>
+        function ajukanSurat(jenis) {
+            alert('Fitur pengajuan surat ' + jenis + ' sedang dalam pengembangan.\\nSilakan datang langsung ke kantor desa.');
+        }
+        
+        function trackStatus() {
+            const nomor = prompt('Masukkan nomor pengajuan Anda:');
+            if (nomor) {
+                window.location.href = '/tracking/' + nomor;
+            }
+        }
+    </script>
+</body>
+</html>";
+    }
+    
+    private function viewProfil($data)
+    {
+        echo "<!DOCTYPE html>
+<html lang='id'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Profil Desa - Sistem Informasi Desa Digital</title>
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'>
+</head>
+<body>
+    <nav class='navbar navbar-expand-lg navbar-dark bg-primary'>
+        <div class='container'>
+            <a class='navbar-brand' href='/'>
+                <i class='fas fa-village me-2'></i>Desa Digital
+            </a>
+            <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNav'>
+                <span class='navbar-toggler-icon'></span>
+            </button>
+            <div class='collapse navbar-collapse' id='navbarNav'>
+                <ul class='navbar-nav ms-auto'>
+                    <li class='nav-item'><a class='nav-link' href='/'>Beranda</a></li>
+                    <li class='nav-item'><a class='nav-link' href='/layanan'>Layanan</a></li>
+                    <li class='nav-item'><a class='nav-link active' href='/profil'>Profil Desa</a></li>
+                    <li class='nav-item'><a class='nav-link' href='/login'>Login Admin</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class='container my-5'>
+        <h1 class='text-center mb-5'>Profil " . htmlspecialchars($data['nama_desa']) . "</h1>
+        
+        <div class='row'>
+            <div class='col-md-8'>
+                <div class='card shadow'>
+                    <div class='card-header bg-primary text-white'>
+                        <h5 class='mb-0'><i class='fas fa-info-circle me-2'></i>Informasi Umum</h5>
+                    </div>
+                    <div class='card-body'>
+                        <div class='row'>
+                            <div class='col-md-6'>
+                                <p><strong>Nama Desa:</strong><br>" . htmlspecialchars($data['nama_desa']) . "</p>
+                                <p><strong>Kecamatan:</strong><br>" . htmlspecialchars($data['kecamatan']) . "</p>
+                                <p><strong>Kabupaten:</strong><br>" . htmlspecialchars($data['kabupaten']) . "</p>
+                            </div>
+                            <div class='col-md-6'>
+                                <p><strong>Jumlah Penduduk:</strong><br>" . number_format($data['jumlah_penduduk']) . " jiwa</p>
+                                <p><strong>Jumlah KK:</strong><br>" . number_format($data['jumlah_kk']) . " KK</p>
+                                <p><strong>Luas Wilayah:</strong><br>" . number_format($data['luas_wilayah'], 2) . " km²</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class='card shadow mt-4'>
+                    <div class='card-header bg-success text-white'>
+                        <h5 class='mb-0'><i class='fas fa-map-marked-alt me-2'></i>Batas Wilayah</h5>
+                    </div>
+                    <div class='card-body'>
+                        <div class='row'>
+                            <div class='col-md-6'>
+                                <p><strong>Sebelah Utara:</strong><br>Desa Tumbang Baraoi</p>
+                                <p><strong>Sebelah Selatan:</strong><br>Desa Sei Rahayu</p>
+                            </div>
+                            <div class='col-md-6'>
+                                <p><strong>Sebelah Timur:</strong><br>Desa Natai Sedawak</p>
+                                <p><strong>Sebelah Barat:</strong><br>Desa Tumbang Marak</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class='card shadow mt-4'>
+                    <div class='card-header bg-info text-white'>
+                        <h5 class='mb-0'><i class='fas fa-building me-2'></i>Fasilitas Umum</h5>
+                    </div>
+                    <div class='card-body'>
+                        <div class='row'>
+                            <div class='col-md-6'>
+                                <ul class='list-unstyled'>
+                                    <li><i class='fas fa-school text-primary me-2'></i>SD Negeri 1 Tumbang Jutuh</li>
+                                    <li><i class='fas fa-hospital text-danger me-2'></i>Puskesmas Pembantu</li>
+                                    <li><i class='fas fa-mosque text-success me-2'></i>Masjid Al-Ikhlas</li>
+                                </ul>
+                            </div>
+                            <div class='col-md-6'>
+                                <ul class='list-unstyled'>
+                                    <li><i class='fas fa-shopping-cart text-warning me-2'></i>Pasar Tradisional</li>
+                                    <li><i class='fas fa-futbol text-info me-2'></i>Lapangan Olahraga</li>
+                                    <li><i class='fas fa-home text-secondary me-2'></i>Balai Desa</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class='col-md-4'>
+                <div class='card shadow'>
+                    <div class='card-header bg-warning text-dark'>
+                        <h5 class='mb-0'><i class='fas fa-users me-2'></i>Perangkat Desa</h5>
+                    </div>
+                    <div class='card-body'>
+                        <div class='text-center mb-3'>
+                            <div class='bg-primary text-white rounded p-2 mb-2'>
+                                <strong>Kepala Desa</strong><br>
+                                H. Ahmad Yani, S.Pd
+                            </div>
+                            <div class='bg-success text-white rounded p-2 mb-2'>
+                                <strong>Sekretaris Desa</strong><br>
+                                Budi Santoso, S.Sos
+                            </div>
+                            <div class='bg-info text-white rounded p-2 mb-2'>
+                                <strong>Kaur Keuangan</strong><br>
+                                Siti Aisyah, S.E
+                            </div>
+                            <div class='bg-secondary text-white rounded p-2'>
+                                <strong>Kaur Umum</strong><br>
+                                Darmawan, S.H
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class='card shadow mt-4'>
+                    <div class='card-header bg-danger text-white'>
+                        <h5 class='mb-0'><i class='fas fa-phone me-2'></i>Kontak</h5>
+                    </div>
+                    <div class='card-body'>
+                        <p><i class='fas fa-phone me-2'></i><strong>Telepon:</strong><br>+62 XXX-XXXX-XXXX</p>
+                        <p><i class='fas fa-envelope me-2'></i><strong>Email:</strong><br>desa@tumbangjiutuh.go.id</p>
+                        <p><i class='fas fa-map-marker-alt me-2'></i><strong>Alamat:</strong><br>Jl. Trans Kalimantan KM 15<br>Tumbang Jutuh, Katingan Hulu<br>Kabupaten Katingan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class='bg-dark text-white py-4 mt-5'>
+        <div class='container text-center'>
+            <p>&copy; 2024 Sistem Informasi Desa Digital - Kabupaten Katingan</p>
+        </div>
+    </footer>
+
+    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script>
+</body>
+</html>";
+    }
+    
+    private function viewTracking($tracking_number)
+    {
+        // Get tracking information from database
+        $tracking_info = $this->getTrackingInfo($tracking_number);
+        
+        echo "<!DOCTYPE html>
+<html lang='id'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Tracking Status - Sistem Informasi Desa Digital</title>
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'>
+    <style>
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -22px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #6c757d;
+        }
+        .timeline-item.active::before {
+            border-color: #28a745;
+            background: #28a745;
+        }
+        .timeline-item.current::before {
+            border-color: #007bff;
+            background: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <nav class='navbar navbar-expand-lg navbar-dark bg-primary'>
+        <div class='container'>
+            <a class='navbar-brand' href='/'>
+                <i class='fas fa-home me-2'></i>Portal Desa Digital
+            </a>
+            <div class='navbar-nav ms-auto'>
+                <a class='nav-link' href='/'>Beranda</a>
+                <a class='nav-link' href='/layanan'>Layanan</a>
+                <a class='nav-link' href='/profil'>Profil Desa</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class='container mt-4'>
+        <div class='row'>
+            <div class='col-12'>
+                <nav aria-label='breadcrumb'>
+                    <ol class='breadcrumb'>
+                        <li class='breadcrumb-item'><a href='/'>Beranda</a></li>
+                        <li class='breadcrumb-item active'>Tracking Status</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class='row'>
+            <div class='col-lg-8 mx-auto'>
+                <div class='card shadow'>
+                    <div class='card-header bg-primary text-white'>
+                        <h4 class='mb-0'>
+                            <i class='fas fa-search me-2'></i>Status Pengajuan Surat
+                        </h4>
+                    </div>
+                    <div class='card-body>";
+        
+        if ($tracking_info) {
+            $status_class = match($tracking_info['status']) {
+                'pending' => 'warning',
+                'diproses' => 'info', 
+                'selesai' => 'success',
+                'ditolak' => 'danger',
+                default => 'secondary'
+            };
+            
+            $status_text = match($tracking_info['status']) {
+                'pending' => 'Menunggu Verifikasi',
+                'diproses' => 'Sedang Diproses',
+                'selesai' => 'Selesai',
+                'ditolak' => 'Ditolak',
+                default => 'Status Tidak Diketahui'
+            };
+            
+            echo "
+                        <div class='alert alert-info d-flex align-items-center'>
+                            <i class='fas fa-info-circle me-2'></i>
+                            <div>
+                                <strong>Nomor Pengajuan:</strong> " . htmlspecialchars($tracking_number) . "
+                            </div>
+                        </div>
+                        
+                        <div class='row mb-4'>
+                            <div class='col-md-6'>
+                                <h6><i class='fas fa-file-alt me-2'></i>Jenis Surat</h6>
+                                <p class='text-muted'>" . htmlspecialchars($tracking_info['jenis_surat']) . "</p>
+                            </div>
+                            <div class='col-md-6'>
+                                <h6><i class='fas fa-calendar me-2'></i>Tanggal Pengajuan</h6>
+                                <p class='text-muted'>" . date('d/m/Y H:i', strtotime($tracking_info['tanggal_pengajuan'])) . "</p>
+                            </div>
+                        </div>
+                        
+                        <div class='row mb-4'>
+                            <div class='col-md-6'>
+                                <h6><i class='fas fa-user me-2'></i>Nama Pemohon</h6>
+                                <p class='text-muted'>" . htmlspecialchars($tracking_info['nama_pemohon']) . "</p>
+                            </div>
+                            <div class='col-md-6'>
+                                <h6><i class='fas fa-flag me-2'></i>Status Saat Ini</h6>
+                                <span class='badge bg-{$status_class} fs-6'>{$status_text}</span>
+                            </div>
+                        </div>
+                        
+                        <h6><i class='fas fa-clock me-2'></i>Timeline Proses</h6>
+                        <div class='timeline'>
+                            <div class='timeline-item active'>
+                                <strong>Pengajuan Diterima</strong>
+                                <div class='text-muted small'>" . date('d/m/Y H:i', strtotime($tracking_info['tanggal_pengajuan'])) . "</div>
+                                <p class='small'>Pengajuan surat telah diterima dan terdaftar dalam sistem.</p>
+                            </div>";
+                            
+            if ($tracking_info['status'] !== 'pending') {
+                echo "
+                            <div class='timeline-item active'>
+                                <strong>Verifikasi Berkas</strong>
+                                <div class='text-muted small'>" . date('d/m/Y H:i', strtotime($tracking_info['tanggal_pengajuan'] . ' +1 hour')) . "</div>
+                                <p class='small'>Berkas pengajuan telah diverifikasi dan memenuhi persyaratan.</p>
+                            </div>";
+            }
+            
+            if ($tracking_info['status'] === 'diproses') {
+                echo "
+                            <div class='timeline-item current'>
+                                <strong>Sedang Diproses</strong>
+                                <div class='text-muted small'>Saat ini</div>
+                                <p class='small'>Surat sedang dalam proses pembuatan dan penandatanganan.</p>
+                            </div>";
+            } elseif ($tracking_info['status'] === 'selesai') {
+                echo "
+                            <div class='timeline-item active'>
+                                <strong>Sedang Diproses</strong>
+                                <div class='text-muted small'>" . date('d/m/Y H:i', strtotime($tracking_info['tanggal_pengajuan'] . ' +2 hours')) . "</div>
+                                <p class='small'>Surat telah dalam proses pembuatan dan penandatanganan.</p>
+                            </div>
+                            <div class='timeline-item active'>
+                                <strong>Selesai</strong>
+                                <div class='text-muted small'>" . date('d/m/Y H:i', strtotime($tracking_info['tanggal_selesai'] ?? $tracking_info['tanggal_pengajuan'] . ' +1 day')) . "</div>
+                                <p class='small'>Surat telah selesai dan siap untuk diambil.</p>
+                            </div>";
+            } elseif ($tracking_info['status'] === 'ditolak') {
+                echo "
+                            <div class='timeline-item' style='color: #dc3545;'>
+                                <strong>Ditolak</strong>
+                                <div class='text-muted small'>" . date('d/m/Y H:i', strtotime($tracking_info['tanggal_pengajuan'] . ' +2 hours')) . "</div>
+                                <p class='small'>Pengajuan ditolak. " . htmlspecialchars($tracking_info['keterangan'] ?? 'Silakan hubungi kantor desa untuk informasi lebih lanjut.') . "</p>
+                            </div>";
+            }
+            
+            echo "
+                        </div>";
+                        
+            if ($tracking_info['status'] === 'selesai') {
+                echo "
+                        <div class='alert alert-success mt-4'>
+                            <i class='fas fa-check-circle me-2'></i>
+                            <strong>Surat Anda telah selesai!</strong><br>
+                            Silakan datang ke kantor desa untuk mengambil surat dengan membawa:
+                            <ul class='mt-2 mb-0'>
+                                <li>Kartu identitas (KTP/KK)</li>
+                                <li>Nomor pengajuan: " . htmlspecialchars($tracking_number) . "</li>
+                            </ul>
+                        </div>";
+            } elseif ($tracking_info['status'] === 'ditolak') {
+                echo "
+                        <div class='alert alert-danger mt-4'>
+                            <i class='fas fa-times-circle me-2'></i>
+                            <strong>Pengajuan Ditolak</strong><br>
+                            Untuk informasi lebih lanjut, silakan hubungi kantor desa di nomor telepon +62 XXX-XXXX-XXXX.
+                        </div>";
+            }
+        } else {
+            echo "
+                        <div class='alert alert-warning d-flex align-items-center'>
+                            <i class='fas fa-exclamation-triangle me-2'></i>
+                            <div>
+                                <strong>Nomor pengajuan tidak ditemukan!</strong><br>
+                                Pastikan nomor pengajuan yang Anda masukkan benar.
+                            </div>
+                        </div>
+                        
+                        <div class='text-center mt-4'>
+                            <p class='text-muted'>Nomor pengajuan: <strong>" . htmlspecialchars($tracking_number) . "</strong></p>
+                            <p>Jika Anda yakin nomor pengajuan benar, silakan hubungi kantor desa.</p>
+                        </div>";
+        }
+        
+        echo "
+                        <div class='text-center mt-4'>
+                            <a href='/' class='btn btn-primary me-2'>
+                                <i class='fas fa-home me-1'></i>Kembali ke Beranda
+                            </a>
+                            <button class='btn btn-outline-primary' onclick='searchAgain()'>
+                                <i class='fas fa-search me-1'></i>Cari Lagi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class='bg-dark text-white py-4 mt-5'>
+        <div class='container text-center'>
+            <p>&copy; 2024 Sistem Informasi Desa Digital - Kabupaten Katingan</p>
+            <p class='text-muted'>
+                <i class='fas fa-phone me-2'></i>+62 XXX-XXXX-XXXX | 
+                <i class='fas fa-envelope me-2'></i>info@desadigital.com
+            </p>
+        </div>
+    </footer>
+
+    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script>
+    <script>
+        function searchAgain() {
+            const nomor = prompt('Masukkan nomor pengajuan Anda:');
+            if (nomor) {
+                window.location.href = '/tracking/' + nomor;
+            }
+        }
+    </script>
+</body>
+</html>";
+    }
+    
+    private function getTrackingInfo($tracking_number)
+    {
+        try {
+            $db = $this->getDatabase();
+            if (!$db) {
+                // Return sample data for demo
+                return $this->getSampleTrackingData($tracking_number);
+            }
+            
+            $stmt = $db->prepare("SELECT * FROM layanan_surat WHERE nomor_pengajuan = ?");
+            $stmt->execute([$tracking_number]);
+            $result = $stmt->fetch();
+            
+            if ($result) {
+                return $result;
+            } else {
+                // Return sample data for demo if not found in database
+                return $this->getSampleTrackingData($tracking_number);
+            }
+        } catch (\Exception $e) {
+            // Return sample data for demo
+            return $this->getSampleTrackingData($tracking_number);
+        }
+    }
+    
+    private function getSampleTrackingData($tracking_number)
+    {
+        // Sample tracking data for demonstration
+        $sample_data = [
+            'SK001-2024' => [
+                'nomor_pengajuan' => 'SK001-2024',
+                'jenis_surat' => 'Surat Keterangan Domisili',
+                'nama_pemohon' => 'Ahmad Fadli',
+                'tanggal_pengajuan' => '2024-07-10 09:30:00',
+                'status' => 'selesai',
+                'tanggal_selesai' => '2024-07-11 14:00:00',
+                'keterangan' => ''
+            ],
+            'SK002-2024' => [
+                'nomor_pengajuan' => 'SK002-2024',
+                'jenis_surat' => 'Surat Keterangan Usaha',
+                'nama_pemohon' => 'Siti Nurhaliza',
+                'tanggal_pengajuan' => '2024-07-11 10:15:00',
+                'status' => 'diproses',
+                'tanggal_selesai' => null,
+                'keterangan' => ''
+            ],
+            'SK003-2024' => [
+                'nomor_pengajuan' => 'SK003-2024',
+                'jenis_surat' => 'Surat Keterangan Tidak Mampu',
+                'nama_pemohon' => 'Budi Santoso',
+                'tanggal_pengajuan' => '2024-07-11 11:00:00',
+                'status' => 'pending',
+                'tanggal_selesai' => null,
+                'keterangan' => ''
+            ]
+        ];
+        
+        return $sample_data[$tracking_number] ?? null;
+    }
+}
