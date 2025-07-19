@@ -1,11 +1,13 @@
-# 🏘️ Sistem Informasi Desa Digital
+<h1 align="center">Sistem Informasi Desa Digital</h1>
 
-**Sistem Informasi Desa Digital untuk Kabupaten Katingan, Kalimantan Tengah**
+<p align="center"><strong>Sistem Informasi Desa Digital untuk Kabupaten Katingan, Kalimantan Tengah</strong></p>
 
-![PHP](https://img.shields.io/badge/PHP-8.1+-777BB4?style=flat&logo=php&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-5.7+-4479A1?style=flat&logo=mysql&logoColor=white)
-![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.0-7952B3?style=flat&logo=bootstrap&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-8.1+-777BB4?style=flat&logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/MySQL-5.7+-4479A1?style=flat&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/Bootstrap-5.3.0-7952B3?style=flat&logo=bootstrap&logoColor=white" alt="Bootstrap">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
+</p>
 
 ---
 
@@ -101,16 +103,6 @@
 
 ---
 
-## 🔑 Akun Demo
-
-| Role         | Email              | Password  |
-|--------------|--------------------|-----------|
-| Kepala Desa  | kepala@desa.com    | password  |
-| Sekretaris   | sekretaris@desa.com| password  |
-| Kaur         | kaur@desa.com      | password  |
-
----
-
 ## 📁 Struktur Proyek
 
 ```
@@ -141,6 +133,7 @@ DB_PORT=3306
 DB_DATABASE=desa_digital
 DB_USERNAME=root
 DB_PASSWORD=
+```
 
 ## 📁 File Upload
 
@@ -196,38 +189,6 @@ Dirancang dengan pendekatan **mobile-first** menggunakan Bootstrap 5 untuk mendu
     git push origin feature/NamaFitur
     ```
 5. Buat **Pull Request**
-
----
-
-## 📄 Lisensi
-
-Proyek ini dilisensikan di bawah **MIT License**.
-
----
-
-## 👨‍💻 Developer
-
-**Muhammad Hadianur Al Rafi**  
-- GitHub: [@AlRafi004](https://github.com/AlRafi004)  
-- Email: your-email@example.com
-
----
-
-## 🙏 Acknowledgments
-
-- Pemerintah Kabupaten Katingan  
-- Komunitas Developer Indonesia  
-- Bootstrap Team  
-- Font Awesome Team
-
----
-
-## 📞 Support
-
-Jika Anda mengalami masalah atau memiliki pertanyaan:
-
-- [Buat Issue di GitHub](https://github.com/AlRafi004/Sistem-Informasi-Desa-Digital/issues)  
-- Email: your-email@example.com
 
 ---
 
